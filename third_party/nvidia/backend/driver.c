@@ -649,10 +649,14 @@ static PyObject *fillTMADescriptorTiled(PyObject *self, PyObject *args) {
   // under NGC 26.06: persistent UTMALDG.5D kernels hit deterministic illegal
   // memory accesses on B200.
   //
+  // CUDA 13.5 (NGC 26.11, libcuda 620.70.08 over a 580 host driver) reports
+  // 13050 and still faults the same way on B300: CUDBG_EXCEPTION_WARP_MMU_FAULT
+  // in the persistent MXFP4 matmul.
+  //
   // Keep the official <128KB condition below and extend the
-  // compatibility-driver gate through CUDA 13.3. Clearing bit 85 is NVIDIA's
+  // compatibility-driver gate through CUDA 13.5. Clearing bit 85 is NVIDIA's
   // documented workaround.
-  if (driver_version <= 13030) {
+  if (driver_version <= 13050) {
     int max_byte_index = 0;
     for (int i = 0; i < rank; ++i) {
       int bytes_stride = i == 0 ? elemSize : stridesLL[i - 1];
